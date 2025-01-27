@@ -1,0 +1,88 @@
+#include <SoftwareSerial.h>
+
+// HC-06 Bluetooth module pins
+SoftwareSerial mySerial(2, 3); // RX (Pin 2), TX (Pin 3)
+
+// Motor control pins
+const int A_1B = 5;
+const int A_1A = 6;
+const int B_1B = 9;
+const int B_1A = 10;
+
+// Motor speed
+const int motorSpeed = 255; // Max speed (0 to 255)
+
+void setup() {
+    Serial.begin(9600);        // For debugging via Serial Monitor
+    mySerial.begin(9600);      // Communication with HC-06
+    Serial.println("Arduino ready to receive commands...");
+
+    // Set motor pins as outputs
+    pinMode(A_1B, OUTPUT);
+    pinMode(A_1A, OUTPUT);
+    pinMode(B_1B, OUTPUT);
+    pinMode(B_1A, OUTPUT);
+}
+
+void loop() {
+    // Check for new commands from HC-06
+    if (mySerial.available()) {
+        char command = mySerial.read(); // Read a single character command
+        Serial.print("Received Command: ");
+        Serial.println(command);
+
+        // Execute the command based on input
+        if (command == 'F') {
+            moveForward();
+        } else if (command == 'B') {
+            moveBackward();
+        } else if (command == 'L') {
+            turnLeft();
+        } else if (command == 'R') {
+            turnRight();
+        } else if (command == 'S') {
+            stopMove();
+        }
+    }
+}
+
+// Movement functions
+void moveForward() {
+    analogWrite(A_1B, 0);         // Stop reverse
+    analogWrite(A_1A, motorSpeed); // Full speed forward
+    analogWrite(B_1B, motorSpeed); // Full speed forward
+    analogWrite(B_1A, 0);         // Stop reverse
+    Serial.println("Moving Forward");
+}
+
+void moveBackward() {
+    analogWrite(A_1B, motorSpeed); // Full speed backward
+    analogWrite(A_1A, 0);         // Stop forward
+    analogWrite(B_1B, 0);         // Stop forward
+    analogWrite(B_1A, motorSpeed); // Full speed backward
+    Serial.println("Moving Backward");
+}
+
+void turnLeft() {
+    analogWrite(A_1B, 0);
+    analogWrite(A_1A, motorSpeed); // Full speed left
+    analogWrite(B_1B, 0);
+    analogWrite(B_1A, motorSpeed);
+    Serial.println("Turning Left");
+}
+
+void turnRight() {
+    analogWrite(A_1B, motorSpeed); // Full speed right
+    analogWrite(A_1A, 0);
+    analogWrite(B_1B, motorSpeed);
+    analogWrite(B_1A, 0);
+    Serial.println("Turning Right");
+}
+
+void stopMove() {
+    analogWrite(A_1B, 0);
+    analogWrite(A_1A, 0);
+    analogWrite(B_1B, 0);
+    analogWrite(B_1A, 0);
+    Serial.println("Stopping");
+}
